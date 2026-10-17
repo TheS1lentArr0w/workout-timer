@@ -121,7 +121,7 @@ struct StepRow: View {
 struct RunView: View {
     @ObservedObject var runner: Runner
     @Environment(\.dismiss) private var dismiss
-
+    
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -137,19 +137,27 @@ struct RunView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Stop") {
-                runner.stop()
-                dismiss()
+            HStack(spacing: 16) {
+                Button(runner.isPaused ? "Resume" : "Pause") {
+                    runner.isPaused ? runner.resume() : runner.pause()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                
+                Button("Stop") {
+                    runner.stop()
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .controlSize(.large)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .controlSize(.large)
-        }
-        .padding()
-        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
-        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
-        .onChange(of: runner.current == nil) { _, finished in
-            if finished { dismiss() }
+            .padding()
+            .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+            .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+            .onChange(of: runner.current == nil) { _, finished in
+                if finished { dismiss() }
+            }
         }
     }
 }
