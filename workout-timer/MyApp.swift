@@ -6,6 +6,8 @@ struct Step: Identifiable {
     let id = UUID()
     var label: String
     var seconds: Int
+    var round: Int? = nil
+    var totalRounds: Int? = nil
 }
 
 struct Block: Identifiable {
@@ -15,7 +17,15 @@ struct Block: Identifiable {
     var steps: [Step]
 
     var flattened: [Step] {
-        (0..<repeatCount).flatMap { _ in steps }
+        guard isGroup else { return steps }
+        return (0..<repeatCount).flatMap { i in
+            steps.map { step in
+                var s = step
+                s.round = i + 1
+                s.totalRounds = repeatCount
+                return s
+            }
+        }
     }
 }
 
