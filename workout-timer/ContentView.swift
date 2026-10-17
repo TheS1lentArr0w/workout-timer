@@ -127,6 +127,11 @@ struct RunView: View {
             Spacer()
             Text(runner.current?.label ?? "Done")
                 .font(.title)
+            if let step = runner.current, let r = step.round, let n = step.totalRounds, n > 1 {
+                Text("Round \(r) of \(n)")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+            }
             Text(formatTime(runner.remaining))
                 .font(.system(size: 96, weight: .bold, design: .rounded))
                 .monospacedDigit()
