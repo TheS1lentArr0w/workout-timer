@@ -6,7 +6,7 @@
 .DS_Store
 
 ## buildServer.json
-.buildServer.json
+buildServer.json
 
 ## User settings
 xcuserdata/
