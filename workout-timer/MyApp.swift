@@ -23,11 +23,14 @@ struct Block: Identifiable {
 final class Runner: ObservableObject {
     @Published var current: Step?
     @Published var remaining = 0
+    @Published var isPaused = false
     @Published private(set) var queue: [Step] = []
     private var endDate = Date()
+    private var pausedRemaining: TimeInterval = 0
     private var ticker: Timer?
 
     func start(_ blocks: [Block]) {
+        isPaused = false
         queue = blocks.flatMap { $0.flattened }
         next()
     }
@@ -39,6 +42,11 @@ final class Runner: ObservableObject {
         current = step
         endDate = Date().addingTimeInterval(TimeInterval(step.seconds))
         remaining = step.seconds
+        startTicker()
+    }
+
+    private func startTicker() {
+        ticker?.invalidate()
         ticker = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick() }
         }
@@ -52,8 +60,23 @@ final class Runner: ObservableObject {
         }
     }
 
+    func pause() {
+        guard current != nil, !isPaused else { return }
+        pausedRemaining = max(0, endDate.timeIntervalSinceNow)
+        ticker?.invalidate()
+        isPaused = true
+    }
+
+    func resume() {
+        guard current != nil, isPaused else { return }
+        endDate = Date().addingTimeInterval(pausedRemaining)
+        isPaused = false
+        startTicker()
+    }
+
     func stop() {
         ticker?.invalidate()
+        isPaused = false
         queue = []
         current = nil
     }
